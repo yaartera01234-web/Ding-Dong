@@ -21,10 +21,20 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # The action's default includes the obsolete "tools" package.
+          # Request only platform-tools; required SDK packages are installed below.
+          packages: platform-tools
+          accept-android-sdk-licenses: true
 
       - name: Install required Android SDK packages
         run: |
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;29.0.14206865"
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;29.0.14206865"
 
       - name: Extract source archive
         run: |
