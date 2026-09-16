@@ -1,0 +1,46 @@
+name: Build Ding-Dong Keyboard
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install required Android SDK packages
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;29.0.14206865"
+
+      - name: Extract source archive
+        run: |
+          mkdir -p extracted
+          unzip -q BossKeyboard-Floris-Base.zip -d extracted
+
+      - name: Build debug APK
+        working-directory: extracted/florisboard-base
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ding-Dong-debug-apk
+          path: extracted/florisboard-base/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          
